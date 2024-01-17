@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/profile/page.jsx", "src/app/api/users/verifyEmail", "src/auth.js", "src/app/api/auth/[...nextauth]/route.js", "src/app/auth/layout.jsx", "src/app/lib/actions.ts", "src/app/api/create-conversation/route.js", "src/app/api/update-conversation/route.ts", "src/app/chat/call/page.jsx", "src/app/ui/chats/CallingLobby.jsx"],
   "exclude": ["node_modules"]
 }

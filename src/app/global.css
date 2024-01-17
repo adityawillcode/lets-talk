@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+.hide-scrollbar {
+    overflow-y: scroll;  /* Enable vertical scrolling */
+    height: 75vh;       /* Adjust height as needed */
+  }
+  
+  /* Hide scrollbar across browsers */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: 2px;   /* Firefox */
+  }
+  
