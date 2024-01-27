@@ -5,27 +5,18 @@ import Chat from "./Chat"
 import { Session } from "@/app/lib/definitions"
 import SocketIoProvider from "@/app/Context/SocketIoProvider"
 import Actions from "../Actions/Actions"
-import { fetchConversations } from "@/app/lib/actions"
 import { useEffect, useState } from "react"
+import CallingLobby from "./CallingLobby"
 
-function ParentChatComponent({ session,myConversations }: { session: Session ,myConversations:any}) {
+function ParentChatComponent({ session, myConversations }: { session: Session, myConversations: any }) {
     const [conversations, setConversations] = useState<any[] | null>(null)
-    // const getConversations = async (myId:string) => {
-    //   const data = await fetchConversations(myId)
-    //  if(data){
-    //   setConversations(data.conversations)
-    //  }
-    // }
-    // useEffect(()=>{
-    //   if(session && !conversations){
-    //     getConversations(session?.user!.myId)
-    //   }
-    // },[session])
-useEffect(()=>{
-    if(myConversations){
-        setConversations(myConversations)
-    }
-},[myConversations])
+    const [isInCall,setIsInCall]=useState(false)
+
+    useEffect(() => {
+        if (myConversations) {
+            setConversations(myConversations)
+        }
+    }, [myConversations])
 
 
 
@@ -33,9 +24,10 @@ useEffect(()=>{
         <SocketIoProvider>
             <ConversationProvider>
                 <div className="flex w-full h-full relative">
-                <Contacts session={session} conversations={conversations}/>
-                <Chat session={session} />
-                <Actions/>
+                    <Contacts session={session} conversations={conversations} />
+                    <Chat session={session} />
+                    <Actions />
+                 
                 </div>
             </ConversationProvider>
         </SocketIoProvider>

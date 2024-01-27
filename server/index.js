@@ -46,6 +46,7 @@ const getOnlineUsers = () => {
 
 
 const getUserById = (userId) => {
+    console.log(users);
     const user = users.find((user) => {
         return user.id == userId
     })
@@ -89,24 +90,19 @@ io.on('connection', (socket) => {
         io.to(message.roomId).emit('message-response', message)
     })
 
-
-    socket.on('call-user', ({ offer, callTo, callFrom }) => {
-        console.log({ callTo, callFrom });
-        // we are having details of sender and reciever , now we need to emit an event for the socket id which reciever is having
-        if (getUserById(callTo.id)) {
-            io.to(getUserById(callTo.id).socketId).emit('call-user', { callFrom, callTo, offer })
-        } else {
-            socket.emit('call-cancel', { callFrom, callTo, errorMessage: 'User Is Offline' })
-        }
+    socket.on('call-user',(data)=>{
+        console.log('this is data from call-user event',data);
+        io.to(getUserById(data.callTo.id).socketId).emit('incoming-call',data)
     })
-    socket.on('call-cancel', ({ callTo, callFrom, errorMessage }) => {
-        io.to(getUserById(callFrom.id).socketId).emit('call-cancel', { callFrom, callTo, errorMessage })
+    socket.on('send-answer',(data)=>{
+        io.to(getUserById(data.callFrom.id).socketId).emit('get-answer',data)
+    })
+    socket.on('accept-call',(data)=>{
+        console.log('this is data from accept-call event',data);
+        io.to(getUserById(data.callFrom.id).socketId).emit('call-accepted',data)
     })
 
-    socket.on('call-accepted', ({callTo, callFrom, answer}) => {
-        console.log('this is call-accepted-event');
-        io.to(getUserById(callFrom.id).socketId).emit('call-accepted', { callFrom, callTo, answer })
-    })
+  
 
 })
 

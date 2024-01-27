@@ -1,3 +1,4 @@
+'use client'
 import React, { Suspense } from 'react'
 import ContactsList from './ContactsList'
 import { SearchConversationInput } from './Input'

@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Session } from '../lib/definitions';
 
 export const ConversationContext = React.createContext<{ selectedConversation: any | null; setSelectedConversation: React.Dispatch<React.SetStateAction<any | null>>;session : Session | null ; setSession:React.Dispatch<React.SetStateAction<Session | null>>;conversations: any | null; setConversations: React.Dispatch<React.SetStateAction<any | null>>; messages:any[] | null ;setMessages:React.Dispatch<React.SetStateAction<any | null>>}>({
