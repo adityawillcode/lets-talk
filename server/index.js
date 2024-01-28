@@ -46,7 +46,6 @@ const getOnlineUsers = () => {
 
 
 const getUserById = (userId) => {
-    console.log(users);
     const user = users.find((user) => {
         return user.id == userId
     })
@@ -91,7 +90,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('call-user',(data)=>{
-        console.log('this is data from call-user event',data);
         io.to(getUserById(data.callTo.id).socketId).emit('incoming-call',data)
     })
     socket.on('send-answer',(data)=>{
@@ -100,6 +98,10 @@ io.on('connection', (socket) => {
     socket.on('accept-call',(data)=>{
         console.log('this is data from accept-call event',data);
         io.to(getUserById(data.callFrom.id).socketId).emit('call-accepted',data)
+    })
+    socket.on('ice-candidates',(data)=>{
+        console.log(data.iceCandidate);
+        io.to(getUserById(data.candidateTo.id).socketId).emit('ice-candidates',data)
     })
 
   
