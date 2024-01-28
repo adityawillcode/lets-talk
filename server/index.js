@@ -92,6 +92,14 @@ io.on('connection', (socket) => {
     socket.on('call-user',(data)=>{
         io.to(getUserById(data.callTo.id).socketId).emit('incoming-call',data)
     })
+    socket.on('negotiation-offer',(data)=>{
+        console.log('offer:',data.offer);
+        io.to(getUserById(data.callTo.id).socketId).emit('negotiation-offer',data)
+    })
+    socket.on('negotiation-answer',(data)=>{
+        console.log('answer',data.answer);
+        io.to(getUserById(data.callFrom.id).socketId).emit('negotiation-answer',data)
+    })
     socket.on('send-answer',(data)=>{
         io.to(getUserById(data.callFrom.id).socketId).emit('get-answer',data)
     })
