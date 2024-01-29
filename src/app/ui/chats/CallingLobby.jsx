@@ -26,17 +26,27 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
   const handleOutgoingCall = async () => {
     localPeerConnection = new RTCPeerConnection(servers)
 
-    socket?.on('get-answer', handleAnswer)
-
-    // sharing ice candidates
-
-    await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+    await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(async (stream) => {
+      
       localVidRef.current.srcObject = stream
      
      stream.getTracks().forEach((track)=>{
         localPeerConnection.addTrack(track,stream)
       })
+  
     })
+    socket?.on('get-answer', handleAnswer)
+    const offer = await createOffer(localPeerConnection)
+    if (offer) {
+      socket?.emit('call-user', {
+        offer, callFrom: { name: session.user.name, id: session.user.myId }, callTo: { name: selectedConversation.user.name, id: selectedConversation.user.id }
+      })
+    }
+
+    // sharing ice candidates
+
+
+
 
     socket?.on('ice-candidates', (data) => {
 
@@ -45,20 +55,8 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
       }
     })
 
-    const offer = await createOffer(localPeerConnection)
-    if (offer) {
-      socket?.emit('call-user', {
-        offer, callFrom: { name: session.user.name, id: session.user.myId }, callTo: { name: selectedConversation.user.name, id: selectedConversation.user.id }
-      })
 
-    }
-
-    localPeerConnection.onicecandidate = (e) => {
-      console.log('ice candidate of user 1:', e.candidate);
-      if (e.candidate) {
-        localIceCandidates.push(e.candidate)
-      }
-    }
+    
 
     localPeerConnection.onnegotiationneeded=(e)=>{
       console.log('negotiation needed');
@@ -75,12 +73,19 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
       })
     }
 
+
     localPeerConnection.ontrack = (event) => {
-      console.log('ontrack function for localPeerConnection',event.streams);
+      console.log('ontrack function for 1');
       remoteStream=event.streams[0]
       remoteVidRef.current.srcObject=event.streams[0]
     }
 
+    localPeerConnection.onicecandidate = (e) => {
+      console.log('ice candidate of user 1:', e.candidate);
+      if (e.candidate) {
+        localIceCandidates.push(e.candidate)
+      }
+    }
   }
 
 
@@ -100,7 +105,7 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
 
 
 
-  const createOffer = async (localPeerConnection) => {
+  const createOffer = async () => {
     try {
       if (localPeerConnection) {
         const offer = await localPeerConnection.createOffer()
@@ -122,7 +127,6 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
         const answer = await remotePeerConnection.createAnswer(incomingCallData.offer)
         if (answer) {
           await remotePeerConnection.setLocalDescription(new RTCSessionDescription(answer))
-          // console.log('this is  answer sdp:', answer);
           return answer
         }
       }
@@ -137,6 +141,12 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
 
 
   const handleAnswer = async (data) => {
+    navigator.mediaDevices.getUserMedia({audio:true,video:true}).then((stream)=>{
+      localVidRef.current.srcObject=stream
+      stream.getTracks().forEach((track)=>{
+        localPeerConnection.addTrack(track,stream)
+      })
+    })
     localIceCandidates.forEach((candidate) => {
       socket.emit('ice-candidates', { candidateTo: selectedConversation.user, candidateFrom: { name: session.user.name, id: session.user.myId }, iceCandidate: candidate })
     })
@@ -177,13 +187,14 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
   const handlePickIncomingCall = async () => {
     remotePeerConnection = new RTCPeerConnection(servers)
 
-   await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((secondStream) => {
+    await navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((secondStream) => {
       secondStream.getTracks().forEach((track) => {
         remotePeerConnection.addTrack(track, secondStream)
       })
       localVidRef.current.srcObject = secondStream;
 
     })
+
 
     await remotePeerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer))
     if (remotePeerConnection.remoteDescription) {
@@ -194,7 +205,9 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
     }
 
 
-    remotePeerConnection.ontrack = (event) => {
+    remotePeerConnection.ontrack =async (event) => {
+     
+      console.log('ontrack for 2');
       remoteStream=event.streams[0]
       remoteVidRef.current.srcObject=event.streams[0]
     }
@@ -208,7 +221,8 @@ function CallingLobby({ isInCall, setIsInCall, socket, session, selectedConversa
 
 
 
-    socket?.on('ice-candidates', (data) => {
+    socket?.on('ice-candidates',async (data) => {
+      
       if (data.iceCandidate) {
         remotePeerConnection.addIceCandidate(data.iceCandidate)
       }
